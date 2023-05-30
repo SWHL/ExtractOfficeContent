@@ -4,10 +4,10 @@
 from pathlib import Path
 
 import pandas as pd
-from pptx.enum.shapes import MSO_SHAPE_TYPE
 import pptx
 from pptx import Presentation
-from utils import mkdir, write_txt
+
+from .utils import mkdir, write_txt
 
 
 class ExtractPPTText():
@@ -17,13 +17,10 @@ class ExtractPPTText():
         mkdir(self.save_dir)
 
     def __call__(self,):
+        extract_list = []
         for i, slide in enumerate(self.prs.slides):
-            print(i)
             cur_page_content = []
-            for shape in slide.shapes:
-                # if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
-                #     pass
-
+            for j, shape in enumerate(slide.shapes):
                 if shape.has_text_frame:
                     txt = self.extract_text(shape.text)
                     if txt:
@@ -34,12 +31,14 @@ class ExtractPPTText():
                 elif shape.has_chart:
                     pass
                 elif hasattr(shape, 'image'):
-                    self.save_image(shape.image, page_num=i)
+                    self.save_image(shape.image, page_num=i, shape_num=j)
                 else:
                     pass
 
+            extract_list.extend(cur_page_content)
             cur_page_path = self.save_dir / f'{i:0>2}.txt'
             write_txt(cur_page_path, cur_page_content)
+        return '\n'.join(extract_list)
 
     @staticmethod
     def extract_text(shape_text):
@@ -59,22 +58,13 @@ class ExtractPPTText():
         table_df = pd.DataFrame(table_list)
         return table_df.to_string()
 
-    def save_image(self, img_value, page_num: int):
+    def save_image(self, img_value, page_num: int, shape_num: int):
         img_name = img_value.filename
 
         save_img_dir = self.save_dir / 'images'
         mkdir(save_img_dir)
-        save_img_path = save_img_dir / f'{page_num}_{img_name}'
+        save_img_path = save_img_dir / f'{page_num}_{shape_num}_{img_name}'
 
         img_blob = img_value.blob
         with open(save_img_path, "wb") as f:
             f.write(img_blob)
-
-
-if __name__ == '__main__':
-    ppt_path = 'test_files/简约活动策划方案汇报PPT模板.pptx'
-
-    ppt_extracter = ExtractPPTText(ppt_path, save_dir='outputs')
-
-    res = ppt_extracter()
-    print(res)
