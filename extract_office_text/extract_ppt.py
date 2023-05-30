@@ -2,6 +2,7 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import pptx
@@ -16,7 +17,7 @@ class ExtractPPTText():
         self.save_dir = Path(save_dir) / Path(ppt_path).stem
         mkdir(self.save_dir)
 
-    def __call__(self,):
+    def __call__(self,) -> List:
         extract_list = []
         for i, slide in enumerate(self.prs.slides):
             cur_page_content = []
@@ -38,7 +39,7 @@ class ExtractPPTText():
             extract_list.extend(cur_page_content)
             cur_page_path = self.save_dir / f'{i:0>2}.txt'
             write_txt(cur_page_path, cur_page_content)
-        return '\n'.join(extract_list)
+        return extract_list
 
     @staticmethod
     def extract_text(shape_text):

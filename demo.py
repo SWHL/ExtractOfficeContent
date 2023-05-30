@@ -4,7 +4,7 @@
 from extract_office_text import ExtractPPTText
 
 
-ppt_path = 'tests/test_files/简约活动策划方案汇报PPT模板.pptx'
+ppt_path = 'tests/test_files/ppt_example.pptx'
 
 ppt_extracter = ExtractPPTText(ppt_path, save_dir='outputs')
 
