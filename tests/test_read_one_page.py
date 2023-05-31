@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-from extract_office_text import ExtractPPTText
+from pptx import Presentation
 
 
 ppt_path = 'tests/test_files/ppt_example.pptx'
+prs = Presentation(ppt_path)
 
-ppt_extracter = ExtractPPTText()
+slides = prs.slides
 
-res = ppt_extracter(ppt_path)
-print(res)
+print('ok')

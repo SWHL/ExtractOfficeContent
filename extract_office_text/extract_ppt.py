@@ -2,6 +2,8 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 from pathlib import Path
+import numpy as np
+import cv2
 from typing import List
 
 import pandas as pd
@@ -12,34 +14,66 @@ from .utils import mkdir, write_txt
 
 
 class ExtractPPTText():
-    def __init__(self, ppt_path: str, save_dir: str):
-        self.prs = Presentation(ppt_path)
-        self.save_dir = Path(save_dir) / Path(ppt_path).stem
-        mkdir(self.save_dir)
+    def __init__(self, ):
+        pass
 
-    def __call__(self,) -> List:
+    def __call__(self, ppt_path: str,
+                 is_save_to_txt: bool = False,
+                 save_txt_dir: str = None,
+                 is_save_img: bool = False,
+                 save_img_dir: str = None) -> List:
+        """
+        是否将内容写入txt中？
+        是否将图像识别OCR也并到txt中？
+        是否单独保留图像到指定目录？
+
+        Args:
+            ppt_path (str): _description_
+
+        Returns:
+            List: _description_
+        """
+        if is_save_to_txt and save_txt_dir is None:
+            raise ValueError(
+                'When is_save_to_txt is True, save_txt_dir must not be None.')
+
+        if is_save_img and save_img_dir is None:
+            raise ValueError(
+                'When is_save_img is True, save_img_dir must be not None.')
+
+        extract_content = self.extract_all(ppt_path)
+
+        if is_save_to_txt and save_txt_dir:
+            full_txt_path = Path(save_txt_dir) / f'{Path(ppt_path).stem}.txt'
+            write_txt(full_txt_path, extract_content)
+        return extract_content
+
+    def extract_all(self, ppt_path: str) -> List:
+        prs = Presentation(ppt_path)
         extract_list = []
-        for i, slide in enumerate(self.prs.slides):
-            cur_page_content = []
-            for j, shape in enumerate(slide.shapes):
-                if shape.has_text_frame:
-                    txt = self.extract_text(shape.text)
-                    if txt:
-                        cur_page_content.append(txt)
-                elif shape.has_table:
-                    table_str = self.extract_table(shape.table)
-                    cur_page_content.append(table_str)
-                elif shape.has_chart:
-                    pass
-                elif hasattr(shape, 'image'):
-                    self.save_image(shape.image, page_num=i, shape_num=j)
-                else:
-                    pass
-
+        for slide in prs.slides:
+            cur_page_content = self.extract_one(slide)
             extract_list.extend(cur_page_content)
-            cur_page_path = self.save_dir / f'{i:0>2}.txt'
-            write_txt(cur_page_path, cur_page_content)
         return extract_list
+
+    def extract_one(self, slide) -> List:
+        cur_page_content, cur_page_imgs = [], []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                txt = self.extract_text(shape.text)
+                if txt:
+                    cur_page_content.append(txt)
+            elif shape.has_table:
+                table_str = self.extract_table(shape.table)
+                cur_page_content.append(table_str)
+            elif shape.has_chart:
+                pass
+            elif hasattr(shape, 'image'):
+                img = self.extract_image(shape.image)
+                cur_page_imgs.append(img)
+            else:
+                pass
+        return cur_page_content, cur_page_imgs
 
     @staticmethod
     def extract_text(shape_text):
@@ -59,13 +93,9 @@ class ExtractPPTText():
         table_df = pd.DataFrame(table_list)
         return table_df.to_string()
 
-    def save_image(self, img_value, page_num: int, shape_num: int):
-        img_name = img_value.filename
-
-        save_img_dir = self.save_dir / 'images'
-        mkdir(save_img_dir)
-        save_img_path = save_img_dir / f'{page_num}_{shape_num}_{img_name}'
-
+    @staticmethod
+    def extract_image(img_value):
         img_blob = img_value.blob
-        with open(save_img_path, "wb") as f:
-            f.write(img_blob)
+        img_np = np.frombuffer(img_blob, dtype=np.uint8)
+        img_array = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+        return img_array
