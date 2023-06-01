@@ -2,10 +2,10 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 from pathlib import Path
-import numpy as np
-import cv2
-from typing import List
+from typing import Dict, List, Tuple
 
+import cv2
+import numpy as np
 import pandas as pd
 import pptx
 from pptx import Presentation
@@ -41,20 +41,33 @@ class ExtractPPTText():
             raise ValueError(
                 'When is_save_img is True, save_img_dir must be not None.')
 
-        extract_content = self.extract_all(ppt_path)
+        txts, imgs = self.extract_all(ppt_path)
 
         if is_save_to_txt and save_txt_dir:
+            mkdir(save_txt_dir)
             full_txt_path = Path(save_txt_dir) / f'{Path(ppt_path).stem}.txt'
-            write_txt(full_txt_path, extract_content)
-        return extract_content
+            write_txt(full_txt_path, list(txts.values()))
 
-    def extract_all(self, ppt_path: str) -> List:
+        if is_save_img and save_img_dir:
+            mkdir(save_img_dir)
+            for page_num, img_list in imgs.items():
+                for i, img in enumerate(img_list):
+                    save_full_path = Path(save_img_dir) / \
+                        f'{page_num}_{i+1}.png'
+                    cv2.imwrite(str(save_full_path), img)
+        return list(txts.values())
+
+    def extract_all(self, ppt_path: str) -> Tuple[Dict, Dict]:
         prs = Presentation(ppt_path)
-        extract_list = []
-        for slide in prs.slides:
-            cur_page_content = self.extract_one(slide)
-            extract_list.extend(cur_page_content)
-        return extract_list
+        extract_txts, extract_imgs = {}, {}
+        for i, slide in enumerate(prs.slides):
+            cur_page = i + 1
+            cur_txts, cur_imgs = self.extract_one(slide)
+
+            extract_txts[cur_page] = '\n'.join(cur_txts)
+            for cur_img in cur_imgs:
+                extract_imgs.setdefault(cur_page, []).append(cur_img)
+        return extract_txts, extract_imgs
 
     def extract_one(self, slide) -> List:
         cur_page_content, cur_page_imgs = [], []
