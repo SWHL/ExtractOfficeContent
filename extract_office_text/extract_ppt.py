@@ -22,16 +22,17 @@ class ExtractPPTText():
                  save_txt_dir: str = None,
                  is_save_img: bool = False,
                  save_img_dir: str = None) -> List:
-        """
-        是否将内容写入txt中？
-        是否将图像识别OCR也并到txt中？
-        是否单独保留图像到指定目录？
+        """Extract content and images of ppt.
 
         Args:
-            ppt_path (str): _description_
+            ppt_path (str): the path of ppt.
+            is_save_to_txt (bool, optional): Whether to save content to txt. Defaults to False.
+            save_txt_dir (str, optional): The directory for saving txt. Defaults to None.
+            is_save_img (bool, optional): Whether to save images to directory. Defaults to False.
+            save_img_dir (str, optional): The directory for saving images. Defaults to None.
 
         Returns:
-            List: _description_
+            List: txts from pptx.
         """
         if is_save_to_txt and save_txt_dir is None:
             raise ValueError(
