@@ -2,7 +2,7 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import cv2
 import numpy as np
@@ -70,7 +70,7 @@ class ExtractPPTText():
                 extract_imgs.setdefault(cur_page, []).append(cur_img)
         return extract_txts, extract_imgs
 
-    def extract_one(self, slide) -> List:
+    def extract_one(self, slide: pptx.slide.Slide) -> List:
         cur_page_content, cur_page_imgs = [], []
         for shape in slide.shapes:
             if shape.has_text_frame:
@@ -90,7 +90,7 @@ class ExtractPPTText():
         return cur_page_content, cur_page_imgs
 
     @staticmethod
-    def extract_text(shape_text):
+    def extract_text(shape_text: str) -> Optional[str]:
         txt = shape_text.strip()
         if txt:
             return txt
@@ -108,7 +108,7 @@ class ExtractPPTText():
         return table_df.to_string()
 
     @staticmethod
-    def extract_image(img_value):
+    def extract_image(img_value: pptx.parts.image.Image) -> np.ndarray:
         img_blob = img_value.blob
         img_np = np.frombuffer(img_blob, dtype=np.uint8)
         img_array = cv2.imdecode(img_np, cv2.IMREAD_COLOR)

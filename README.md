@@ -37,3 +37,6 @@ res = ppt_extracter(ppt_path,
 print(res)
 
 ```
+
+### 参考资料
+- [Pandas读取excel合并单元格的正确姿势（openpyxl合并单元格拆分并填充内容）](https://blog.51cto.com/u_11466419/6100833)
