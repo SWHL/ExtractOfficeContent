@@ -8,7 +8,7 @@ excel_extract = ExtractExcel()
 
 excel_path = 'tests/test_files/excel_example.xlsx'
 
-res  = excel_extract(excel_path)
+res  = excel_extract(excel_path, out_format='markdown')
 
 print(res)
 print('ok')

@@ -7,7 +7,8 @@
   - [x] 提供是否保存提取内容到txt中选项
   - [x] 提供是否单独提取图像到指定目录选项
   - [ ] 是否对提取的图像过OCR，并保存到txt中选项
-- [ ] 增加excel内容提取，支持多种输格式（makdown,html）
+- [x] 增加excel内容提取，支持多种输格式（makdown,html）
+- [ ] excel中图像的提取
 - [ ] 增加word内容提取
 - [ ] 提供单独指定格式的内容提取，例如:
     ```bash
@@ -35,7 +36,19 @@ res = ppt_extracter(ppt_path,
                     is_save_to_txt=True,
                     save_txt_dir=save_dir)
 print(res)
+```
 
+### 提取Excel中文本
+```python
+from extract_office_text import ExtractExcel
+
+excel_extract = ExtractExcel()
+
+excel_path = 'tests/test_files/excel_example.xlsx'
+
+res  = excel_extract(excel_path, out_format='markdown')
+
+print(res)
 ```
 
 ### 参考资料
