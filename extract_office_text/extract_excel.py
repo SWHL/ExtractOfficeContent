@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+import warnings
 import shutil
 import tempfile
 import uuid
@@ -19,10 +20,12 @@ class ExtractExcel():
     def __init__(self,):
         pass
 
-    def __call__(self, excel_path: str,
+    def __call__(self, excel_path: Union[str, Path],
                  out_format: str = 'markdown',
                  is_save_img: bool = False,
                  save_img_dir: str = None) -> List:
+
+        excel_path = str(excel_path)
         wb = self.unmerge_cell(excel_path)
         data_table = self.extract_table(wb, out_format)
 
@@ -30,7 +33,12 @@ class ExtractExcel():
             if save_img_dir is None:
                 raise ValueError(
                     'When is_save_img is True, save_img_dir must be not None.')
-            self.extract_imgs(excel_path, save_img_dir)
+
+            try:
+                self.extract_imgs(excel_path, save_img_dir)
+            except FileExistsError:
+                warnings.warn(f'The {excel_path} does not contain any images.')
+
         return data_table
 
     def unmerge_cell(self, file_name: str) -> Workbook:
@@ -88,15 +96,17 @@ class ExtractExcel():
 
         excel_path.rename(zip_excel_path)
 
-        unzip_dir = excel_path.parent / excel_path.stem
-        with zipfile.ZipFile(zip_excel_path) as zf:
-            zf.extractall(unzip_dir)
-        zip_excel_path.rename(excel_path)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            unzip_dir = Path(tmp_dir) / excel_path.stem
+            with zipfile.ZipFile(zip_excel_path) as zf:
+                zf.extractall(unzip_dir)
 
-        imgs_dir = unzip_dir / 'xl' / 'media'
-        if not imgs_dir.exists():
-            raise FileExistsError('The xl/media is not existed.')
+            zip_excel_path.rename(excel_path)
 
-        mkdir(save_img_dir)
-        shutil.move(imgs_dir, save_img_dir)
-        shutil.rmtree(unzip_dir)
+            imgs_dir = unzip_dir / 'xl' / 'media'
+            if not imgs_dir.exists():
+                raise FileExistsError('The xl/media is not existed.')
+
+            mkdir(save_img_dir)
+            for img_path in imgs_dir.iterdir():
+                shutil.move(str(img_path), str(save_img_dir))

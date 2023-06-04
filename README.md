@@ -8,7 +8,7 @@
   - [x] 提供是否单独提取图像到指定目录选项
   - [ ] 是否对提取的图像过OCR，并保存到txt中选项
 - [x] 增加excel内容提取，支持多种输格式（makdown,html）
-- [ ] excel中图像的提取
+- [x] excel中图像的提取
 - [ ] 增加word内容提取
 - [ ] 提供单独指定格式的内容提取，例如:
     ```bash
@@ -29,7 +29,6 @@ ppt_extracter = ExtractPPTText()
 
 save_dir = 'outputs'
 save_img_dir = Path(save_dir) / Path(ppt_path).stem
-
 res = ppt_extracter(ppt_path,
                     is_save_img=True,
                     save_img_dir=str(save_img_dir),
@@ -38,18 +37,26 @@ res = ppt_extracter(ppt_path,
 print(res)
 ```
 
-### 提取Excel中文本
-```python
-from extract_office_text import ExtractExcel
+### 提取Excel内容
+- 仅提取文本：
+    ```python
+    from extract_office_text import ExtractExcel
 
-excel_extract = ExtractExcel()
+    excel_extract = ExtractExcel()
+    excel_path = 'tests/test_files/excel_example.xlsx'
+    res  = excel_extract(excel_path, out_format='markdown')
+    print(res)
+    ```
+- 提取文本和图像（如果有）
+    ```python
+    from extract_office_text import ExtractExcel
 
-excel_path = 'tests/test_files/excel_example.xlsx'
-
-res  = excel_extract(excel_path, out_format='markdown')
-
-print(res)
-```
+    excel_extract = ExtractExcel()
+    excel_path = 'tests/test_files/excel_with_image.xlsx'
+    res  = excel_extract(excel_path, out_format='markdown',
+                        is_save_img=True, save_img_dir='1')
+    print(res)
+    ```
 
 ### 参考资料
 - [Pandas读取excel合并单元格的正确姿势（openpyxl合并单元格拆分并填充内容）](https://blog.51cto.com/u_11466419/6100833)
