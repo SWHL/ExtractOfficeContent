@@ -3,12 +3,12 @@
 # @Contact: liekkaskono@163.com
 from pathlib import Path
 
-from extract_office_text import ExtractPPTText
+from extract_office_text import ExtractPPT
 
 
 ppt_path = 'tests/test_files/ppt_example.pptx'
 
-ppt_extracter = ExtractPPTText()
+ppt_extracter = ExtractPPT()
 
 save_dir = 'outputs'
 save_img_dir = Path(save_dir) / Path(ppt_path).stem

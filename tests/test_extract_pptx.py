@@ -10,9 +10,9 @@ root_dir = tests_dir.parent
 
 sys.path.append(str(root_dir))
 
-from extract_office_text import ExtractPPTText
+from extract_office_text import ExtractPPT
 
-ppt_extracter = ExtractPPTText()
+ppt_extracter = ExtractPPT()
 
 
 def test_normal_input():

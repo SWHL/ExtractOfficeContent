@@ -13,7 +13,7 @@ from pptx import Presentation
 from .utils import mkdir, write_txt
 
 
-class ExtractPPTText():
+class ExtractPPT():
     def __init__(self, ):
         pass
 

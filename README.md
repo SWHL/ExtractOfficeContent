@@ -10,6 +10,8 @@
 - [x] 增加excel内容提取，支持多种输格式（makdown,html）
 - [x] excel中图像的提取
 - [ ] 增加word内容提取
+  - [ ] 支持提取表格
+  - [x] 支持提取图像
 - [ ] 提供单独指定格式的内容提取，例如:
     ```bash
     pip install extract_office_text[word]
@@ -20,12 +22,12 @@
 ```python
 from pathlib import Path
 
-from extract_office_text import ExtractPPTText
+from extract_office_text import ExtractPPT
 
 
 ppt_path = 'tests/test_files/ppt_example.pptx'
 
-ppt_extracter = ExtractPPTText()
+ppt_extracter = ExtractPPT()
 
 save_dir = 'outputs'
 save_img_dir = Path(save_dir) / Path(ppt_path).stem
@@ -60,3 +62,4 @@ print(res)
 
 ### 参考资料
 - [Pandas读取excel合并单元格的正确姿势（openpyxl合并单元格拆分并填充内容）](https://blog.51cto.com/u_11466419/6100833)
+- [python-docx2txt](https://github.com/ankushshah89/python-docx2txt)
