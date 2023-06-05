@@ -18,38 +18,26 @@ class ExtractPPT():
         pass
 
     def __call__(self, ppt_path: str,
-                 is_save_to_txt: bool = False,
                  save_txt_dir: str = None,
-                 is_save_img: bool = False,
                  save_img_dir: str = None) -> List:
         """Extract content and images of ppt.
 
         Args:
             ppt_path (str): the path of ppt.
-            is_save_to_txt (bool, optional): Whether to save content to txt. Defaults to False.
             save_txt_dir (str, optional): The directory for saving txt. Defaults to None.
-            is_save_img (bool, optional): Whether to save images to directory. Defaults to False.
             save_img_dir (str, optional): The directory for saving images. Defaults to None.
 
         Returns:
             List: txts from pptx.
         """
-        if is_save_to_txt and save_txt_dir is None:
-            raise ValueError(
-                'When is_save_to_txt is True, save_txt_dir must not be None.')
-
-        if is_save_img and save_img_dir is None:
-            raise ValueError(
-                'When is_save_img is True, save_img_dir must be not None.')
-
         txts, imgs = self.extract_all(ppt_path)
 
-        if is_save_to_txt and save_txt_dir:
+        if save_txt_dir:
             mkdir(save_txt_dir)
             full_txt_path = Path(save_txt_dir) / f'{Path(ppt_path).stem}.txt'
             write_txt(full_txt_path, list(txts.values()))
 
-        if is_save_img and save_img_dir:
+        if save_img_dir:
             mkdir(save_img_dir)
             for page_num, img_list in imgs.items():
                 for i, img in enumerate(img_list):

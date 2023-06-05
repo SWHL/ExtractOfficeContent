@@ -1,10 +1,9 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-import warnings
-import shutil
 import tempfile
 import uuid
+import warnings
 import zipfile
 from pathlib import Path
 from typing import List, Union
@@ -18,26 +17,20 @@ from .utils import mkdir
 
 class ExtractExcel():
     def __init__(self,):
-        pass
+        self.img_suffix = [".jpg", ".jpeg", ".png", ".bmp"]
 
     def __call__(self, excel_path: Union[str, Path],
                  out_format: str = 'markdown',
-                 is_save_img: bool = False,
                  save_img_dir: str = None) -> List:
 
         excel_path = str(excel_path)
         wb = self.unmerge_cell(excel_path)
         data_table = self.extract_table(wb, out_format)
 
-        if is_save_img:
-            if save_img_dir is None:
-                raise ValueError(
-                    'When is_save_img is True, save_img_dir must be not None.')
-
-            try:
-                self.extract_imgs(excel_path, save_img_dir)
-            except FileExistsError:
-                warnings.warn(f'The {excel_path} does not contain any images.')
+        try:
+            self.extract_imgs(excel_path, save_img_dir)
+        except FileExistsError:
+            warnings.warn(f'The {excel_path} does not contain any images.')
 
         return data_table
 
@@ -89,24 +82,21 @@ class ExtractExcel():
         except AttributeError as exc:
             raise AttributeError(f'{out_format} is not supported.') from exc
 
-    @staticmethod
-    def extract_imgs(excel_path: str, save_img_dir: Union[str, Path]) -> None:
+    def extract_imgs(self, excel_path: str,
+                     save_img_dir: Union[str, Path]) -> None:
         excel_path = Path(excel_path)
-        zip_excel_path = excel_path.with_name(f'{excel_path.stem}.zip')
 
-        excel_path.rename(zip_excel_path)
+        with zipfile.ZipFile(excel_path) as zf:
+            file_list = zf.namelist()
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            unzip_dir = Path(tmp_dir) / excel_path.stem
-            with zipfile.ZipFile(zip_excel_path) as zf:
-                zf.extractall(unzip_dir)
+            img_list = [path for path in file_list
+                        if Path(path).suffix in self.img_suffix]
 
-            zip_excel_path.rename(excel_path)
-
-            imgs_dir = unzip_dir / 'xl' / 'media'
-            if not imgs_dir.exists():
+            if not img_list:
                 raise FileExistsError('The xl/media is not existed.')
 
             mkdir(save_img_dir)
-            for img_path in imgs_dir.iterdir():
-                shutil.move(str(img_path), str(save_img_dir))
+            for img_path in img_list:
+                save_path = Path(save_img_dir) / Path(img_path).name
+                with open(save_path, 'wb') as f:
+                    f.write(zf.read(img_path))
