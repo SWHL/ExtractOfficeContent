@@ -29,3 +29,8 @@ def write_txt(save_path: Union[str, Path],
     with open(save_path, mode, encoding='utf-8') as f:
         for value in content:
             f.write(f'{value}\n')
+
+
+def is_contain(sentence: str, key_words: Union[str, List],) -> bool:
+    """sentences中是否包含key_words中任意一个"""
+    return any(i in sentence for i in key_words)

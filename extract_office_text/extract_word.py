@@ -8,18 +8,28 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
+import docx
+import pandas as pd
+from docx.document import Document
+from docx.oxml.table import CT_Tbl
+from docx.table import Table, _Cell
+from .utils import is_contain, mkdir
+
 
 class ExtractWord():
     def __init__(self, ):
         self.img_suffix = [".jpg", ".jpeg", ".png", ".bmp"]
-        self.nsmap = {'w':
-            'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+        self.nsmap = {
+            'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+        }
+        self.extract_table = ExtractWordTable()
 
-    def __call__(self, docx: str, img_dir=None):
+    def __call__(self, docx_path: str, img_dir=None):
+        self.table_content = self.extract_table(docx_path)
         text = ''
 
-        # unzip the docx in memory
-        zipf = zipfile.ZipFile(docx)
+        # unzip the docx_path in memory
+        zipf = zipfile.ZipFile(docx_path)
         filelist = zipf.namelist()
 
         header_files, footer_files, img_files = [], [], []
@@ -43,7 +53,8 @@ class ExtractWord():
 
         # get main text
         doc_xml = 'word/document.xml'
-        text += self.xml2text(zipf.read(doc_xml))
+        main_txt = self.xml2text(zipf.read(doc_xml))
+        text += main_txt
 
         # get footer text
         # there can be 3 footer files in the zip
@@ -51,6 +62,7 @@ class ExtractWord():
         text += ''.join(footer_text)
 
         if img_dir:
+            mkdir(img_dir)
             for img_path in img_files:
                 dst_fname = Path(img_dir) / Path(img_path).name
                 with open(dst_fname, "wb") as dst_f:
@@ -89,6 +101,59 @@ class ExtractWord():
             elif child.tag == self.qn("w:p"):
                 text += '\n\n'
         return text
+
+
+class ExtractWordTable():
+    def __init__(self,):
+        pass
+
+    def __call__(self, docx_path):
+        curr_content = []
+        doc = docx.Document(docx_path)
+        for block in self.iter_block_items(doc):
+            if is_contain(block.style.name, ['Table', 'Table Grid']):
+                df = self.get_table_dataframe(block)
+                try:
+                    curr_content.append(f'\n{df.to_string()}')
+                except:
+                    curr_content.append(f'\n{df}')
+        return curr_content
+
+    def iter_block_items(self, parent):
+        if isinstance(parent, Document):
+            # 判断传入的是否为word文档对象，是则获取文档内容的全部子对象
+            parent_elm = parent.element.body
+        elif isinstance(parent, _Cell):
+            # 判断传入的是否为单元格，是则获取单元格内全部子对象
+            parent_elm = parent._tc
+        else:
+            raise ValueError("something's not right")
+
+        for child in parent_elm.iterchildren():
+            if isinstance(child, CT_Tbl):
+                yield Table(child, parent)
+
+    def get_table_dataframe(self, table: docx.table.Table) -> pd.DataFrame:
+        '''获取表格数据，转换为dataframe数据结构'''
+        text = []
+        if len(table.rows) == 1:
+            for i in table.rows[0].cells:
+                text.append(i.text)
+            return text[-1]
+
+        keys, table_data = None, []
+        for i, row in enumerate(table.rows):
+            # 获取表格一行的数据
+            text = (cell.text for cell in row.cells)
+
+            # 判断是否是表头
+            if i == 0:
+                keys = tuple(text)
+                continue
+
+            table_data.append(dict(zip(keys, text)))
+        df = pd.DataFrame(table_data)
+        return df
 
 
 def main():

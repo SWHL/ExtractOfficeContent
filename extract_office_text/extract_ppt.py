@@ -2,10 +2,8 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
-import cv2
-import numpy as np
 import pandas as pd
 import pptx
 from pptx import Presentation
@@ -18,13 +16,13 @@ class ExtractPPT():
         pass
 
     def __call__(self, ppt_path: str,
-                 save_txt_dir: str = None,
+                 save_txt_path: Union[str, Path] = None,
                  save_img_dir: str = None) -> List:
         """Extract content and images of ppt.
 
         Args:
             ppt_path (str): the path of ppt.
-            save_txt_dir (str, optional): The directory for saving txt. Defaults to None.
+            save_txt_path (str, optional): The path for saving txt. Defaults to None.
             save_img_dir (str, optional): The directory for saving images. Defaults to None.
 
         Returns:
@@ -32,18 +30,12 @@ class ExtractPPT():
         """
         txts, imgs = self.extract_all(ppt_path)
 
-        if save_txt_dir:
-            mkdir(save_txt_dir)
-            full_txt_path = Path(save_txt_dir) / f'{Path(ppt_path).stem}.txt'
-            write_txt(full_txt_path, list(txts.values()))
+        if save_txt_path:
+            mkdir(Path(save_txt_path).parent)
+            write_txt(save_txt_path, list(txts.values()))
 
         if save_img_dir:
-            mkdir(save_img_dir)
-            for page_num, img_list in imgs.items():
-                for i, img in enumerate(img_list):
-                    save_full_path = Path(save_img_dir) / \
-                        f'{page_num}_{i+1}.png'
-                    cv2.imwrite(str(save_full_path), img)
+            self.save_img(imgs, save_img_dir)
         return list(txts.values())
 
     def extract_all(self, ppt_path: str) -> Tuple[Dict, Dict]:
@@ -71,8 +63,8 @@ class ExtractPPT():
             elif shape.has_chart:
                 pass
             elif hasattr(shape, 'image'):
-                img = self.extract_image(shape.image)
-                cur_page_imgs.append(img)
+                img_bytes = self.extract_image(shape.image)
+                cur_page_imgs.append(img_bytes)
             else:
                 pass
         return cur_page_content, cur_page_imgs
@@ -96,8 +88,14 @@ class ExtractPPT():
         return table_df.to_string()
 
     @staticmethod
-    def extract_image(img_value: pptx.parts.image.Image) -> np.ndarray:
-        img_blob = img_value.blob
-        img_np = np.frombuffer(img_blob, dtype=np.uint8)
-        img_array = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
-        return img_array
+    def extract_image(img_value: pptx.parts.image.Image) -> bytes:
+        return img_value.blob
+
+    @staticmethod
+    def save_img(imgs: Dict, save_img_dir: Union[str, Path]) -> None:
+        mkdir(save_img_dir)
+        for page_num, img_list in imgs.items():
+            for i, img in enumerate(img_list):
+                save_full_path = Path(save_img_dir) / f'{page_num}_{i+1}.png'
+                with open(str(save_full_path), 'wb') as f:
+                    f.write(img)

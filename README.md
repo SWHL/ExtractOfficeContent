@@ -33,7 +33,7 @@ save_dir = 'outputs'
 save_img_dir = Path(save_dir) / Path(ppt_path).stem
 res = ppt_extracter(ppt_path,
                     save_img_dir=str(save_img_dir),
-                    save_txt_dir=save_dir)
+                    save_txt_path=Path(save_dir) / '1.txt')
 print(res)
 ```
 
