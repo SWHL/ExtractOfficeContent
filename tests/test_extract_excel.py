@@ -13,7 +13,7 @@ root_dir = tests_dir.parent
 
 sys.path.append(str(root_dir))
 
-from extract_office_text import ExtractExcel
+from extract_office_content import ExtractExcel
 
 excel_extracter = ExtractExcel()
 

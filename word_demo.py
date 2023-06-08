@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-from extract_office_text import ExtractWord
+from extract_office_content import ExtractWord
 
 
 word_extract = ExtractWord()

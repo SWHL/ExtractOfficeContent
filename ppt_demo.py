@@ -3,7 +3,7 @@
 # @Contact: liekkaskono@163.com
 from pathlib import Path
 
-from extract_office_text import ExtractPPT
+from extract_office_content import ExtractPPT
 
 
 ppt_path = 'tests/test_files/ppt_example.pptx'

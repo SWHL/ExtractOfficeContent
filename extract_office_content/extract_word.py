@@ -7,6 +7,7 @@ import sys
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+import lxml.etree as etree
 
 import docx
 import pandas as pd
@@ -23,6 +24,7 @@ class ExtractWord():
             'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
         }
         self.extract_table = ExtractWordTable()
+        self.parser = etree.XMLParser()
 
     def __call__(self, docx_path: str, img_dir=None):
         self.table_content = self.extract_table(docx_path)
@@ -68,7 +70,7 @@ class ExtractWord():
                 with open(dst_fname, "wb") as dst_f:
                     dst_f.write(zipf.read(img_path))
         zipf.close()
-        return text.strip()
+        return text.strip() + '\n'.join(self.table_content)
 
     def qn(self, tag):
         """
@@ -89,10 +91,15 @@ class ExtractWord():
         Adapted from: https://github.com/python-openxml/python-docx/
         """
         text = ''
+        table_xml = self.extract_table_by_xml(xml_path=xml)
+
         root = ET.fromstring(xml)
         for child in root.iter():
             if child.tag == self.qn('w:t'):
                 t_text = child.text
+                if t_text in table_xml:
+                    continue
+
                 text += t_text if t_text is not None else ''
             elif child.tag == self.qn('w:tab'):
                 text += '\t'
@@ -101,6 +108,12 @@ class ExtractWord():
             elif child.tag == self.qn("w:p"):
                 text += '\n\n'
         return text
+
+    def extract_table_by_xml(self, xml_path: str,) -> str:
+        tree = etree.fromstring(xml_path, self.parser)
+        table_txts = tree.xpath('//w:tbl//w:t/text()',
+                                namespaces=self.nsmap)
+        return table_txts
 
 
 class ExtractWordTable():
@@ -114,7 +127,7 @@ class ExtractWordTable():
             if is_contain(block.style.name, ['Table', 'Table Grid']):
                 df = self.get_table_dataframe(block)
                 try:
-                    curr_content.append(f'\n{df.to_string()}')
+                    curr_content.append(f'\n{df.to_markdown()}')
                 except:
                     curr_content.append(f'\n{df}')
         return curr_content

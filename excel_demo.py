@@ -2,7 +2,7 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 
-from extract_office_text import ExtractExcel
+from extract_office_content import ExtractExcel
 
 excel_extract = ExtractExcel()
 

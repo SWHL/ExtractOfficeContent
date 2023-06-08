@@ -11,8 +11,8 @@ root_dir = tests_dir.parent
 
 sys.path.append(str(root_dir))
 
-from extract_office_text.utils import read_txt
-from extract_office_text import ExtractPPT
+from extract_office_content.utils import read_txt
+from extract_office_content import ExtractPPT
 
 ppt_extracter = ExtractPPT()
 ppt_path = test_file_dir / 'ppt_example.pptx'
