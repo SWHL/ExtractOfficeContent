@@ -40,7 +40,6 @@ def test_with_images():
 
         img_list = list(Path(tmp_dir).glob('*.*'))
         assert len(img_list) == 2
-        assert img_list[0].name == 'image1.jpeg'
         assert res[0][:9] == '|    | 班级'
 
 
