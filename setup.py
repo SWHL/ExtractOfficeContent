@@ -33,6 +33,7 @@ try:
     latest_version = obtainer(MODULE_NAME)
 except ValueError:
     latest_version = '0.0.1'
+
 VERSION_NUM = obtainer.version_add_one(latest_version)
 
 if len(sys.argv) > 2:
