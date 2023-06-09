@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -8,31 +9,27 @@ import pandas as pd
 import pptx
 from pptx import Presentation
 
-from .utils import mkdir, write_txt
+from .utils import mkdir
 
 
 class ExtractPPT():
     def __init__(self, ):
         pass
 
-    def __call__(self, ppt_path: str,
-                 save_txt_path: Union[str, Path] = None,
-                 save_img_dir: str = None) -> List:
+    def __call__(self, ppt_path: str, save_img_dir: str = None) -> List:
         """Extract content and images of ppt.
 
         Args:
             ppt_path (str): the path of ppt.
-            save_txt_path (str, optional): The path for saving txt. Defaults to None.
             save_img_dir (str, optional): The directory for saving images. Defaults to None.
 
         Returns:
             List: txts from pptx.
         """
-        txts, imgs = self.extract_all(ppt_path)
+        if not Path(ppt_path).exists():
+            raise FileNotFoundError(f'{ppt_path} does not exist.')
 
-        if save_txt_path:
-            mkdir(Path(save_txt_path).parent)
-            write_txt(save_txt_path, list(txts.values()))
+        txts, imgs = self.extract_all(ppt_path)
 
         if save_img_dir:
             self.save_img(imgs, save_img_dir)
@@ -99,3 +96,18 @@ class ExtractPPT():
                 save_full_path = Path(save_img_dir) / f'{page_num}_{i+1}.png'
                 with open(str(save_full_path), 'wb') as f:
                     f.write(img)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('ppt_path', type=str)
+    parser.add_argument('-img_dir', '--save_img_dir', type=str, default=None)
+    args = parser.parse_args()
+
+    ppt_extracter = ExtractPPT()
+    res = ppt_extracter(args.ppt_path, save_img_dir=args.save_img_dir)
+    print(res)
+
+
+if __name__ == '__main__':
+    main()

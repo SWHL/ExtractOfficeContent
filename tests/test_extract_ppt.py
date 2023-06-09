@@ -32,11 +32,3 @@ def test_with_images():
         img_list = list(Path(tmp_dir).glob('*.*'))
         assert len(img_list) == 38
 
-
-def test_with_txt():
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        txt_path = Path(tmp_dir) / '1.txt'
-        res = ppt_extracter(ppt_path, save_txt_path=txt_path)
-
-        content = read_txt(txt_path)
-        assert content[-1][:13] == '字体下载：http://w'

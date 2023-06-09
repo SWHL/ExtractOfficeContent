@@ -66,6 +66,11 @@ setuptools.setup(
     ],
     python_requires='>=3.7,<=3.10',
     entry_points={
-        'console_scripts': [f'{MODULE_NAME}={MODULE_NAME}.{MODULE_NAME}:main'],
+        'console_scripts': [
+            f'extract_office_content={MODULE_NAME}.main:main',
+            f'extract_excel={MODULE_NAME}.extract_excel:main',
+            f'extract_ppt={MODULE_NAME}.extract_ppt:main',
+            f'extract_word={MODULE_NAME}.extract_word:main',
+        ],
     }
 )

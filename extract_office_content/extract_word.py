@@ -26,7 +26,10 @@ class ExtractWord():
         self.extract_table = ExtractWordTable()
         self.parser = etree.XMLParser()
 
-    def __call__(self, docx_path: str, img_dir=None):
+    def __call__(self, docx_path: str, save_img_dir=None):
+        if not Path(docx_path).exists():
+            raise FileNotFoundError(f'{docx_path} does not exist.')
+
         self.table_content = self.extract_table(docx_path)
         text = ''
 
@@ -63,10 +66,10 @@ class ExtractWord():
         footer_text = [self.xml2text(zipf.read(path)) for path in footer_files]
         text += ''.join(footer_text)
 
-        if img_dir:
-            mkdir(img_dir)
+        if save_img_dir:
+            mkdir(save_img_dir)
             for img_path in img_files:
-                dst_fname = Path(img_dir) / Path(img_path).name
+                dst_fname = Path(save_img_dir) / Path(img_path).name
                 with open(dst_fname, "wb") as dst_f:
                     dst_f.write(zipf.read(img_path))
         zipf.close()
@@ -170,26 +173,14 @@ class ExtractWordTable():
 
 
 def main():
-    parser = argparse.ArgumentParser(description='A pure python-based utility '
-                                                 'to extract text and images '
-                                                 'from docx files.')
-    parser.add_argument("docx", help="path of the docx file")
-    parser.add_argument('-i', '--img_dir', help='path of directory '
-                                                'to extract images')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('word_path', type=str)
+    parser.add_argument('-img_dir', '--save_img_dir', type=str, default=None)
     args = parser.parse_args()
 
-    if not os.path.exists(args.docx):
-        print('File {} does not exist.'.format(args.docx))
-        sys.exit(1)
-
-    if args.img_dir is not None:
-        if not os.path.exists(args.img_dir):
-            try:
-                os.makedirs(args.img_dir)
-            except OSError:
-                print("Unable to create img_dir {}".format(args.img_dir))
-                sys.exit(1)
-    return args
+    word_extract = ExtractWord()
+    res = word_extract(args.word_path, save_img_dir=args.save_img_dir)
+    print(res)
 
 
 if __name__ == '__main__':

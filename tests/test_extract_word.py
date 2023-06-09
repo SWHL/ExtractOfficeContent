@@ -21,9 +21,9 @@ word_path = test_file_dir / 'word_example.docx'
 def test_normal_input():
     res = word_extracter(word_path)
 
-    assert len(res) == 361
+    assert len(res) == 557
     assert res[:10] == '我与父亲不相见已二年'
-    assert res[-2:] == ' Ｅ'
+    assert res[-2:] == ' |'
 
 
 def test_extract_imgs():

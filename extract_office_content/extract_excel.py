@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+import argparse
 import tempfile
 import uuid
 import warnings
@@ -22,15 +23,18 @@ class ExtractExcel():
     def __call__(self, excel_path: Union[str, Path],
                  out_format: str = 'markdown',
                  save_img_dir: str = None) -> List:
+        if not Path(excel_path).exists():
+            raise FileNotFoundError(f'{excel_path} does not exist.')
 
         excel_path = str(excel_path)
         wb = self.unmerge_cell(excel_path)
         data_table = self.extract_table(wb, out_format)
 
-        try:
-            self.extract_imgs(excel_path, save_img_dir)
-        except FileExistsError:
-            warnings.warn(f'The {excel_path} does not contain any images.')
+        if save_img_dir:
+            try:
+                self.extract_imgs(excel_path, save_img_dir)
+            except FileExistsError:
+                warnings.warn(f'The {excel_path} does not contain any images.')
 
         return data_table
 
@@ -100,3 +104,21 @@ class ExtractExcel():
                 save_path = Path(save_img_dir) / Path(img_path).name
                 with open(save_path, 'wb') as f:
                     f.write(zf.read(img_path))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('excel_path', type=str)
+    parser.add_argument('-f', '--output_format', type=str, default='markdown',
+                        choices=['markdown', 'html', 'latex', 'string'])
+    parser.add_argument('-o', '--save_img_dir', type=str, default=None)
+    args = parser.parse_args()
+
+    excel_extract = ExtractExcel()
+    res = excel_extract(args.excel_path, out_format=args.output_format,
+                        save_img_dir=args.save_img_dir)
+    print(res)
+
+
+if __name__ == '__main__':
+    main()
