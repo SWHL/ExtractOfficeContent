@@ -123,6 +123,6 @@
         print(res)
         ```
 
-### 参考资料
+### Reference
 - [Pandas读取excel合并单元格的正确姿势（openpyxl合并单元格拆分并填充内容）](https://blog.51cto.com/u_11466419/6100833)
 - [python-docx2txt](https://github.com/ankushshah89/python-docx2txt)
