@@ -58,7 +58,10 @@ class ExtractPPT():
                 table_str = self.extract_table(shape.table)
                 cur_page_content.append(table_str)
             elif shape.has_chart:
-                pass
+                excel_bytes = shape.chart.part.chart_workbook.xlsx_part.blob
+                # TODO:
+                # with open('1.xlsx', 'wb') as f:
+                #     f.write('excel_bytes)
             elif hasattr(shape, 'image'):
                 img_bytes = self.extract_image(shape.image)
                 cur_page_imgs.append(img_bytes)
@@ -82,7 +85,7 @@ class ExtractPPT():
                 each += cell.text_frame.text + ','
             table_list.append(each)
         table_df = pd.DataFrame(table_list)
-        return table_df.to_string()
+        return table_df.to_markdown(index=None)
 
     @staticmethod
     def extract_image(img_value: pptx.parts.image.Image) -> bytes:
