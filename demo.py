@@ -15,5 +15,5 @@ extracter = ExtractOfficeContent()
 #     res = extracter(file_path)
 #     print(res)
 
-res = extracter('tests/test_files/ppt_example.pptx')
+res = extracter('tests/test_files/ppt_example.pptx', save_img_dir='outputs')
 print(res)
