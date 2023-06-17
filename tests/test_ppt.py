@@ -29,4 +29,4 @@ def test_with_images():
         res = ppt_extracter(ppt_path, save_img_dir=tmp_dir)
 
         img_list = list(Path(tmp_dir).glob('*.*'))
-        assert len(img_list) == 1
+        assert len(img_list) == 2
