@@ -41,7 +41,6 @@ if len(sys.argv) > 2:
     matched_versions = obtainer.extract_version(match_str)
     if matched_versions:
         VERSION_NUM = matched_versions
-
 sys.argv = sys.argv[:2]
 
 require = read_txt('requirements.txt')
