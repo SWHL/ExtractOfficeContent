@@ -33,7 +33,7 @@ class ExtractPPT():
 
         if save_img_dir:
             if imgs:
-                self.save_object(imgs, save_img_dir, suffix=='png')
+                self.save_object(imgs, save_img_dir, suffix='png')
 
             if charts:
                 self.save_object(charts, save_img_dir, suffix='xlsx')
