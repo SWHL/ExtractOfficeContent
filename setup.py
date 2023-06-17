@@ -41,6 +41,7 @@ if len(sys.argv) > 2:
     matched_versions = obtainer.extract_version(match_str)
     if matched_versions:
         VERSION_NUM = matched_versions
+
 sys.argv = sys.argv[:2]
 
 require = read_txt('requirements.txt')
@@ -58,14 +59,15 @@ setuptools.setup(
     include_package_data=True,
     install_requires=require,
     packages=[MODULE_NAME],
-    keywords=['extract,office,text'],
+    keywords=['extract,office,text,content'],
     classifiers=[
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
-    python_requires='>=3.7,<=3.10',
+    python_requires='>=3.6,<=3.11',
     entry_points={
         'console_scripts': [
             f'extract_office_content={MODULE_NAME}.main:main',
