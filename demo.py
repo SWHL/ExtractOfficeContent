@@ -7,8 +7,6 @@ from extract_office_content import ExtractOfficeContent
 
 
 extracter = ExtractOfficeContent()
-
-
 file_list = list(Path('tests/test_files').iterdir())
 
 for file_path in file_list:

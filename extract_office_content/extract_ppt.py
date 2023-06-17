@@ -29,26 +29,30 @@ class ExtractPPT():
         if not Path(ppt_path).exists():
             raise FileNotFoundError(f'{ppt_path} does not exist.')
 
-        txts, imgs = self.extract_all(ppt_path)
+        txts, imgs, charts = self.extract_all(ppt_path)
 
         if save_img_dir:
-            self.save_img(imgs, save_img_dir)
+            if imgs:
+                self.save_object(imgs, save_img_dir, suffix=='png')
+
+            if charts:
+                self.save_object(charts, save_img_dir, suffix='xlsx')
         return list(txts.values())
 
     def extract_all(self, ppt_path: str) -> Tuple[Dict, Dict]:
         prs = Presentation(ppt_path)
-        extract_txts, extract_imgs = {}, {}
+        extract_txts, extract_imgs, extract_charts = {}, {}, {}
         for i, slide in enumerate(prs.slides):
             cur_page = i + 1
-            cur_txts, cur_imgs = self.extract_one(slide)
+            cur_txts, cur_imgs, cur_charts = self.extract_one(slide)
 
             extract_txts[cur_page] = '\n'.join(cur_txts)
-            for cur_img in cur_imgs:
-                extract_imgs.setdefault(cur_page, []).append(cur_img)
-        return extract_txts, extract_imgs
+            extract_imgs.update({cur_page: cur_imgs})
+            extract_charts.update({cur_page: cur_charts})
+        return extract_txts, extract_imgs, extract_charts
 
-    def extract_one(self, slide: pptx.slide.Slide) -> List:
-        cur_page_content, cur_page_imgs = [], []
+    def extract_one(self, slide: pptx.slide.Slide) -> Tuple[List, List, List]:
+        cur_page_content, cur_page_imgs, cur_page_charts = [], [], []
         for shape in slide.shapes:
             if shape.has_text_frame:
                 txt = self.extract_text(shape.text)
@@ -58,13 +62,14 @@ class ExtractPPT():
                 table_str = self.extract_table(shape.table)
                 cur_page_content.append(table_str)
             elif shape.has_chart:
-                pass
+                excel_bytes = shape.chart.part.chart_workbook.xlsx_part.blob
+                cur_page_charts.append(excel_bytes)
             elif hasattr(shape, 'image'):
                 img_bytes = self.extract_image(shape.image)
                 cur_page_imgs.append(img_bytes)
             else:
                 pass
-        return cur_page_content, cur_page_imgs
+        return cur_page_content, cur_page_imgs, cur_page_charts
 
     @staticmethod
     def extract_text(shape_text: str) -> Optional[str]:
@@ -82,18 +87,19 @@ class ExtractPPT():
                 each += cell.text_frame.text + ','
             table_list.append(each)
         table_df = pd.DataFrame(table_list)
-        return table_df.to_string()
+        return table_df.to_markdown(index=None)
 
     @staticmethod
     def extract_image(img_value: pptx.parts.image.Image) -> bytes:
         return img_value.blob
 
     @staticmethod
-    def save_img(imgs: Dict, save_img_dir: Union[str, Path]) -> None:
-        mkdir(save_img_dir)
-        for page_num, img_list in imgs.items():
-            for i, img in enumerate(img_list):
-                save_full_path = Path(save_img_dir) / f'{page_num}_{i+1}.png'
+    def save_object(objs: Dict,
+                    save_dir: Union[str, Path], suffix: str) -> None:
+        mkdir(save_dir)
+        for page_num, obj_list in objs.items():
+            for i, img in enumerate(obj_list):
+                save_full_path = Path(save_dir) / f'{page_num}_{i+1}.{suffix}'
                 with open(str(save_full_path), 'wb') as f:
                     f.write(img)
 

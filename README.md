@@ -6,6 +6,12 @@
     <a href="https://pepy.tech/project/extract_office_content"><img src="https://static.pepy.tech/personalized-badge/extract_office_content?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 </p>
 
+### 目前已知问题
+- 提取PPT:
+  - 提取ppt中的内容时，会丢失带有公式的文本框
+  - 提取的表格格式不全
+  - PPT中的表格会提取为对应的excel文件，是否有更好的方式？
+
 ### Use
 1. Install`extract_office_content`
    ```bash

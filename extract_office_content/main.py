@@ -18,7 +18,7 @@ class ExtractOfficeContent():
         self.word = ExtractWord()
 
         self.doc_suffix = ['doc', 'docx']
-        self.excel_suffix= ['xls', 'xlsx']
+        self.excel_suffix = ['xls', 'xlsx']
         self.ppt_suffix = ['ppt', 'pptx']
 
     def __call__(self, file_content: Union[Path, str],
@@ -31,7 +31,7 @@ class ExtractOfficeContent():
         file_type = self.which_type(file_content)
         all_suffix = self.doc_suffix + self.excel_suffix + self.ppt_suffix
         if file_type not in all_suffix:
-            raise ValueError(f'{file_type} must in {self.allowed_suffix}')
+            raise ValueError(f'{file_type} must in {all_suffix}')
 
         if file_type in self.doc_suffix:
             return self.word(file_content, save_img_dir)
