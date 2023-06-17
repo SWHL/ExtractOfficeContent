@@ -1,19 +1,20 @@
 #! /usr/bin/env python
 # Modified from https://github.com/ankushshah89/python-docx2txt
+from io import BytesIO
 import argparse
-import os
 import re
-import sys
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
-import lxml.etree as etree
+from typing import Union
 
 import docx
+import lxml.etree as etree
 import pandas as pd
 from docx.document import Document
 from docx.oxml.table import CT_Tbl
 from docx.table import Table, _Cell
+
 from .utils import is_contain, mkdir
 
 
@@ -26,15 +27,17 @@ class ExtractWord():
         self.extract_table = ExtractWordTable()
         self.parser = etree.XMLParser()
 
-    def __call__(self, docx_path: str, save_img_dir=None):
-        if not Path(docx_path).exists():
-            raise FileNotFoundError(f'{docx_path} does not exist.')
+    def __call__(self, docx_content: Union[str, bytes], save_img_dir=None):
+        if isinstance(docx_content, str) and not Path(docx_content).exists():
+            raise FileNotFoundError(f'{docx_content} does not exist.')
+        elif isinstance(docx_content, bytes):
+            docx_content = BytesIO(docx_content)
 
-        self.table_content = self.extract_table(docx_path)
+        self.table_content = self.extract_table(docx_content)
         text = ''
 
-        # unzip the docx_path in memory
-        zipf = zipfile.ZipFile(docx_path)
+        # unzip the docx_content in memory
+        zipf = zipfile.ZipFile(docx_content)
         filelist = zipf.namelist()
 
         header_files, footer_files, img_files = [], [], []
@@ -123,9 +126,9 @@ class ExtractWordTable():
     def __init__(self,):
         pass
 
-    def __call__(self, docx_path):
+    def __call__(self, docx_content):
         curr_content = []
-        doc = docx.Document(docx_path)
+        doc = docx.Document(docx_content)
         for block in self.iter_block_items(doc):
             if is_contain(block.style.name, ['Table', 'Table Grid']):
                 df = self.get_table_dataframe(block)

@@ -77,22 +77,6 @@
         $ extract_excel tests/test_files/excel_example.xlsx
         ```
 3. Run by python script.
-   - Extract all.
-        ```python
-        from pathlib import Path
-
-        from extract_office_content import ExtractOfficeContent
-
-
-        extracter = ExtractOfficeContent()
-
-
-        file_list = list(Path('tests/test_files').iterdir())
-
-        for file_path in file_list:
-            res = extracter(file_path)
-            print(res)
-        ```
     - Extract Word.
         ```python
         from extract_office_content import ExtractWord
@@ -102,6 +86,11 @@
 
         word_path = 'tests/test_files/word_example.docx'
         text = word_extract(word_path, "outputs/word")
+
+        # or bytes
+        with open(word_path, 'rb') as f:
+            word_content = f.read()
+        text = word_extract(word_content, "outputs/word")
         print(text)
         ```
     - Extract PPT.
@@ -116,6 +105,11 @@
         save_dir = 'outputs'
         save_img_dir = Path(save_dir) / Path(ppt_path).stem
         res = ppt_extracter(ppt_path, save_img_dir=str(save_img_dir))
+
+        # or bytes
+        with open(ppt_path, 'rb') as f:
+            ppt_content = f.read()
+        res = ppt_extracter(ppt_content, save_img_dir=str(save_img_dir))
         print(res)
         ```
     - Extract Excel.
@@ -126,8 +120,18 @@
 
         excel_path = 'tests/test_files/excel_with_image.xlsx'
         res  = excel_extract(excel_path, out_format='markdown', save_img_dir='1')
+
+        # or
+        with open(excel_path, 'rb') as f:
+            excel_content = f.read()
+        res  = excel_extract(excel_content, out_format='markdown', save_img_dir='1')
         print(res)
         ```
+
+
+### 更新日志
+- 2023-06-17 v0.0.4 update:
+  - 支持`file-like object`输入
 
 ### Reference
 - [Pandas读取excel合并单元格的正确姿势（openpyxl合并单元格拆分并填充内容）](https://blog.51cto.com/u_11466419/6100833)

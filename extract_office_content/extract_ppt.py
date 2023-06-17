@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+from io import BytesIO
 import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
@@ -16,21 +17,24 @@ class ExtractPPT():
     def __init__(self, ):
         pass
 
-    def __call__(self, ppt_path: str, save_img_dir: str = None) -> List:
+    def __call__(self, ppt_content: Union[str, bytes],
+                 save_img_dir: str = None) -> List:
         """Extract content and images of ppt.
 
         Args:
-            ppt_path (str): the path of ppt.
+            ppt_content (str, bytes): the path of ppt.
             save_img_dir (str, optional): The directory for saving images. Defaults to None.
 
         Returns:
             List: txts from pptx.
         """
-        if not Path(ppt_path).exists():
-            raise FileNotFoundError(f'{ppt_path} does not exist.')
+        if isinstance(ppt_content, str):
+            if not Path(ppt_content).exists():
+                raise FileNotFoundError(f'{ppt_content} does not exist.')
+        elif isinstance(ppt_content, bytes):
+            ppt_content = BytesIO(ppt_content)
 
-        txts, imgs, charts = self.extract_all(ppt_path)
-
+        txts, imgs, charts = self.extract_all(ppt_content)
         if save_img_dir:
             if imgs:
                 self.save_object(imgs, save_img_dir, suffix='png')
@@ -39,7 +43,7 @@ class ExtractPPT():
                 self.save_object(charts, save_img_dir, suffix='xlsx')
         return list(txts.values())
 
-    def extract_all(self, ppt_path: str) -> Tuple[Dict, Dict]:
+    def extract_all(self, ppt_path: Union[str, bytes]) -> Tuple[Dict, Dict]:
         prs = Presentation(ppt_path)
         extract_txts, extract_imgs, extract_charts = {}, {}, {}
         for i, slide in enumerate(prs.slides):

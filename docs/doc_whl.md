@@ -76,12 +76,10 @@
    - Extract all.
         ```python
         from pathlib import Path
-
         from extract_office_content import ExtractOfficeContent
 
 
         extracter = ExtractOfficeContent()
-
 
         file_list = list(Path('tests/test_files').iterdir())
 
@@ -98,6 +96,11 @@
 
         word_path = 'tests/test_files/word_example.docx'
         text = word_extract(word_path, "outputs/word")
+
+        # or bytes
+        with open(word_path, 'rb') as f:
+            word_content = f.read()
+        text = word_extract(word_content, "outputs/word")
         print(text)
         ```
     - Extract PPT.
@@ -112,6 +115,11 @@
         save_dir = 'outputs'
         save_img_dir = Path(save_dir) / Path(ppt_path).stem
         res = ppt_extracter(ppt_path, save_img_dir=str(save_img_dir))
+
+        # or bytes
+        with open(ppt_path, 'rb') as f:
+            ppt_content = f.read()
+        res = ppt_extracter(ppt_content, save_img_dir=str(save_img_dir))
         print(res)
         ```
     - Extract Excel.
@@ -122,6 +130,11 @@
 
         excel_path = 'tests/test_files/excel_with_image.xlsx'
         res  = excel_extract(excel_path, out_format='markdown', save_img_dir='1')
+
+        # or
+        with open(excel_path, 'rb') as f:
+            excel_content = f.read()
+        res  = excel_extract(excel_content, out_format='markdown', save_img_dir='1')
         print(res)
         ```
 

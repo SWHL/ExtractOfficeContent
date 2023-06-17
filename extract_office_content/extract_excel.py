@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+from io import BytesIO
 import argparse
 import tempfile
 import uuid
@@ -20,21 +21,25 @@ class ExtractExcel():
     def __init__(self,):
         self.img_suffix = [".jpg", ".jpeg", ".png", ".bmp"]
 
-    def __call__(self, excel_path: Union[str, Path],
+    def __call__(self, excel_content: Union[str, Path, bytes],
                  out_format: str = 'markdown',
                  save_img_dir: str = None) -> List:
-        if not Path(excel_path).exists():
-            raise FileNotFoundError(f'{excel_path} does not exist.')
 
-        excel_path = str(excel_path)
-        wb = self.unmerge_cell(excel_path)
+        if isinstance(excel_content, (str, Path)):
+            if not Path(excel_content).exists():
+                raise FileNotFoundError(f'{excel_content} does not exist.')
+            excel_content = str(excel_content)
+        elif isinstance(excel_content, bytes):
+            excel_content = BytesIO(excel_content)
+
+        wb = self.unmerge_cell(excel_content)
         data_table = self.extract_table(wb, out_format)
 
         if save_img_dir:
             try:
-                self.extract_imgs(excel_path, save_img_dir)
+                self.extract_imgs(excel_content, save_img_dir)
             except FileExistsError:
-                warnings.warn(f'The {excel_path} does not contain any images.')
+                warnings.warn(f'The {excel_content} does not contain any images.')
 
         return data_table
 
@@ -86,11 +91,9 @@ class ExtractExcel():
         except AttributeError as exc:
             raise AttributeError(f'{out_format} is not supported.') from exc
 
-    def extract_imgs(self, excel_path: str,
+    def extract_imgs(self, excel_content: Union[str, Path, bytes],
                      save_img_dir: Union[str, Path]) -> None:
-        excel_path = Path(excel_path)
-
-        with zipfile.ZipFile(excel_path) as zf:
+        with zipfile.ZipFile(excel_content) as zf:
             file_list = zf.namelist()
 
             img_list = [path for path in file_list

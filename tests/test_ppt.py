@@ -24,6 +24,15 @@ def test_normal_input():
     assert res[-1][:3] == '| 0'
 
 
+def test_input_bytes():
+    with open(ppt_path, 'rb') as f:
+        ppt_content = f.read()
+    res = ppt_extracter(ppt_content)
+
+    assert len(res) == 1
+    assert res[-1][:3] == '| 0'
+
+
 def test_with_images():
     with tempfile.TemporaryDirectory() as tmp_dir:
         res = ppt_extracter(ppt_path, save_img_dir=tmp_dir)

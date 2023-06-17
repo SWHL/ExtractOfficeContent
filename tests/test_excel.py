@@ -33,6 +33,23 @@ def test_normal_input(out_format, sheet_len, gt):
     assert res[0][:9] == gt
 
 
+@pytest.mark.parametrize(
+    'out_format, sheet_len, gt',
+    [
+        ('markdown', 2, '|    | 班级'),
+        ('html', 2, '<table bo')
+    ]
+)
+def test_input_bytes(out_format, sheet_len, gt):
+    excel_path = test_file_dir / 'excel_example.xlsx'
+    with open(excel_path, 'rb') as f:
+        excel_content = f.read()
+    res = excel_extracter(excel_content, out_format=out_format)
+
+    assert len(res) == sheet_len
+    assert res[0][:9] == gt
+
+
 def test_with_images():
     excel_path = test_file_dir / 'excel_with_image.xlsx'
     with tempfile.TemporaryDirectory() as tmp_dir:
