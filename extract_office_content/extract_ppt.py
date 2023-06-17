@@ -33,10 +33,10 @@ class ExtractPPT():
 
         if save_img_dir:
             if imgs:
-                self.save_object(imgs, save_img_dir, format='png')
+                self.save_object(imgs, save_img_dir, suffix=='png')
 
             if charts:
-                self.save_object(charts, save_img_dir, format='xlsx')
+                self.save_object(charts, save_img_dir, suffix='xlsx')
         return list(txts.values())
 
     def extract_all(self, ppt_path: str) -> Tuple[Dict, Dict]:
@@ -94,11 +94,12 @@ class ExtractPPT():
         return img_value.blob
 
     @staticmethod
-    def save_object(objs: Dict, save_dir: Union[str, Path], format: str) -> None:
+    def save_object(objs: Dict,
+                    save_dir: Union[str, Path], suffix: str) -> None:
         mkdir(save_dir)
         for page_num, obj_list in objs.items():
             for i, img in enumerate(obj_list):
-                save_full_path = Path(save_dir) / f'{page_num}_{i+1}.{format}'
+                save_full_path = Path(save_dir) / f'{page_num}_{i+1}.{suffix}'
                 with open(str(save_full_path), 'wb') as f:
                     f.write(img)
 

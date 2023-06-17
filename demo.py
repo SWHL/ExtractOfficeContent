@@ -7,13 +7,8 @@ from extract_office_content import ExtractOfficeContent
 
 
 extracter = ExtractOfficeContent()
+file_list = list(Path('tests/test_files').iterdir())
 
-
-# file_list = list(Path('tests/test_files').iterdir())
-
-# for file_path in file_list:
-#     res = extracter(file_path)
-#     print(res)
-
-res = extracter('tests/test_files/ppt_example.pptx', save_img_dir='outputs')
-print(res)
+for file_path in file_list:
+    res = extracter(file_path)
+    print(res)
