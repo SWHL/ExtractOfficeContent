@@ -13,8 +13,6 @@
   - 提取的表格格式不全
   - PPT中的表格会提取为对应的excel文件，是否有更好的方式？
 
-<iframe src="https://swhl-extractofficecontentdemo.hf.space"></iframe>
-
 ### Use
 1. Install`extract_office_content`
    ```bash
