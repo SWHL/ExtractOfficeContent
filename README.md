@@ -1,6 +1,6 @@
 ## Extract Office Content
 <p>
-    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Python->=3.6,<=3.11-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg"></a>
     <a href="https://pypi.org/project/extract_office_content/"><img alt="PyPI" src="https://img.shields.io/pypi/v/extract_office_content"></a>
     <a href="https://pepy.tech/project/extract_office_content"><img src="https://static.pepy.tech/personalized-badge/extract_office_content?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
