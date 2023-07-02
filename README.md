@@ -14,6 +14,8 @@
   - 提取ppt中的内容时，会丢失带有公式的文本框
   - 提取的表格格式不全
   - PPT中的表格会提取为对应的excel文件，是否有更好的方式？
+- 提取Word:
+  - 表格位置不能与原文中一一对应
 
 ### Use
 1. Install`extract_office_content`
@@ -144,6 +146,8 @@
 
 
 ### 更新日志
+- 2023-07-02 v0.0.6 update:
+  - 统一提取word接口返回值为List，与其他统一
 - 2023-06-17 v0.0.4 update:
   - 支持`file-like object`输入
 

@@ -21,8 +21,8 @@ word_path = test_file_dir / "word_example.docx"
 def test_normal_input():
     res = word_extracter(word_path)
 
-    assert res[:10] == "我与父亲不相见已二年"
-    assert res[-2:] == " |"
+    assert res[0][:10] == "我与父亲不相见已二年"
+    assert res[0][-2:] == "行。"
 
 
 def test_input_bytes():
@@ -30,8 +30,8 @@ def test_input_bytes():
         word_content = f.read()
     res = word_extracter(word_content)
 
-    assert res[:10] == "我与父亲不相见已二年"
-    assert res[-2:] == " |"
+    assert res[0][:10] == "我与父亲不相见已二年"
+    assert res[0][-2:] == "行。"
 
 
 def test_extract_imgs():

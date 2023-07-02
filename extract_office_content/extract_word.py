@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # Modified from https://github.com/ankushshah89/python-docx2txt
-from io import BytesIO
 import argparse
 import re
 import xml.etree.ElementTree as ET
 import zipfile
+from io import BytesIO
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 import docx
 import lxml.etree as etree
@@ -29,14 +29,15 @@ class ExtractWord:
         self.extract_table = ExtractWordTable()
         self.parser = etree.XMLParser()
 
-    def __call__(self, docx_content: Union[str, bytes], save_img_dir=None):
+    def __call__(self, docx_content: Union[str, bytes], save_img_dir=None) -> List:
         if isinstance(docx_content, str) and not Path(docx_content).exists():
             raise FileNotFoundError(f"{docx_content} does not exist.")
         elif isinstance(docx_content, bytes):
             docx_content = BytesIO(docx_content)
 
         self.table_content = self.extract_table(docx_content)
-        text = ""
+
+        text = []
 
         # unzip the docx_content in memory
         zipf = zipfile.ZipFile(docx_content)
@@ -59,17 +60,22 @@ class ExtractWord:
         # get header text
         # there can be 3 header files in the zip
         header_text = [self.xml2text(zipf.read(path)) for path in header_files]
-        text += "".join(header_text)
+        if header_text:
+            header_text = "".join(header_text).strip()
+            text.append(header_text)
 
         # get main text
         doc_xml = "word/document.xml"
         main_txt = self.xml2text(zipf.read(doc_xml))
-        text += main_txt
+        if main_txt:
+            text.append(main_txt.strip())
 
         # get footer text
         # there can be 3 footer files in the zip
         footer_text = [self.xml2text(zipf.read(path)) for path in footer_files]
-        text += "".join(footer_text)
+        if footer_text:
+            footer_text = "".join(footer_text).strip()
+            text.append(footer_text)
 
         if save_img_dir:
             mkdir(save_img_dir)
@@ -78,7 +84,9 @@ class ExtractWord:
                 with open(dst_fname, "wb") as dst_f:
                     dst_f.write(zipf.read(img_path))
         zipf.close()
-        return text.strip() + "\n".join(self.table_content)
+
+        text.extend(self.table_content)
+        return text
 
     def qn(self, tag):
         """
