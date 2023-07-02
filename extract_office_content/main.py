@@ -11,27 +11,26 @@ from .extract_ppt import ExtractPPT
 from .extract_word import ExtractWord
 
 
-class ExtractOfficeContent():
+class ExtractOfficeContent:
     def __init__(self) -> None:
         self.excel = ExtractExcel()
         self.ppt = ExtractPPT()
         self.word = ExtractWord()
 
-        self.doc_suffix = ['doc', 'docx']
-        self.excel_suffix = ['xls', 'xlsx']
-        self.ppt_suffix = ['ppt', 'pptx']
+        self.doc_suffix = ["doc", "docx"]
+        self.excel_suffix = ["xls", "xlsx"]
+        self.ppt_suffix = ["ppt", "pptx"]
 
-    def __call__(self, file_content: Union[Path, str],
-                 save_img_dir: str = None):
+    def __call__(self, file_content: Union[Path, str], save_img_dir: str = None):
         file_content = str(file_content)
 
         if not file_content:
-            raise ValueError(f'{file_content} must be Path or str.')
+            raise ValueError(f"{file_content} must be Path or str.")
 
         file_type = self.which_type(file_content)
         all_suffix = self.doc_suffix + self.excel_suffix + self.ppt_suffix
         if file_type not in all_suffix:
-            raise ValueError(f'{file_type} must in {all_suffix}')
+            raise ValueError(f"{file_type} must in {all_suffix}")
 
         if file_type in self.doc_suffix:
             return self.word(file_content, save_img_dir)
@@ -47,18 +46,22 @@ class ExtractOfficeContent():
             return filetype.guess(file_content).extension
 
         if isinstance(file_content, bytes):
-            with open(file_content, 'rb') as f:
+            with open(file_content, "rb") as f:
                 data = f.read()
 
             return filetype.guess(data).extension
 
-        raise ValueError(f'{file_content} must be [str, Path] type.')
+        raise ValueError(f"{file_content} must be [str, Path] type.")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('file_path', type=str)
-    parser.add_argument('-img_dir', '--save_img_dir', type=str, )
+    parser.add_argument("file_path", type=str)
+    parser.add_argument(
+        "-img_dir",
+        "--save_img_dir",
+        type=str,
+    )
     args = parser.parse_args()
 
     extracter = ExtractOfficeContent()
@@ -72,5 +75,5 @@ def main():
         print(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -5,6 +5,8 @@
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg"></a>
     <a href="https://pypi.org/project/extract_office_content/"><img alt="PyPI" src="https://img.shields.io/pypi/v/extract_office_content"></a>
     <a href="https://pepy.tech/project/extract_office_content"><img src="https://static.pepy.tech/personalized-badge/extract_office_content?period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
+    <a href="https://semver.org/"><img alt="SemVer2.0" src="https://img.shields.io/badge/SemVer-2.0-brightgreen"></a>
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
 ### 目前已知问题
@@ -78,13 +80,24 @@
         $ extract_excel tests/test_files/excel_example.xlsx
         ```
 3. Run by python script.
+    - Extract All.
+        ```python
+        from pathlib import Path
+
+        from extract_office_content import ExtractOfficeContent
+
+        extracter = ExtractOfficeContent()
+        file_list = list(Path('tests/test_files').iterdir())
+
+        for file_path in file_list:
+            res = extracter(file_path)
+            print(res)
+        ```
     - Extract Word.
         ```python
         from extract_office_content import ExtractWord
 
-
         word_extract = ExtractWord()
-
         word_path = 'tests/test_files/word_example.docx'
         text = word_extract(word_path, "outputs/word")
 
@@ -122,7 +135,7 @@
         excel_path = 'tests/test_files/excel_with_image.xlsx'
         res  = excel_extract(excel_path, out_format='markdown', save_img_dir='1')
 
-        # or
+        # or bytes
         with open(excel_path, 'rb') as f:
             excel_content = f.read()
         res  = excel_extract(excel_content, out_format='markdown', save_img_dir='1')

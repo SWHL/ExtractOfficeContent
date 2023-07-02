@@ -91,7 +91,6 @@
         ```python
         from extract_office_content import ExtractWord
 
-
         word_extract = ExtractWord()
 
         word_path = 'tests/test_files/word_example.docx'

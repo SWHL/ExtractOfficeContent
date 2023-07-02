@@ -18,31 +18,33 @@ from docx.table import Table, _Cell
 from .utils import is_contain, mkdir
 
 
-class ExtractWord():
-    def __init__(self, ):
+class ExtractWord:
+    def __init__(
+        self,
+    ):
         self.img_suffix = [".jpg", ".jpeg", ".png", ".bmp"]
         self.nsmap = {
-            'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+            "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
         }
         self.extract_table = ExtractWordTable()
         self.parser = etree.XMLParser()
 
     def __call__(self, docx_content: Union[str, bytes], save_img_dir=None):
         if isinstance(docx_content, str) and not Path(docx_content).exists():
-            raise FileNotFoundError(f'{docx_content} does not exist.')
+            raise FileNotFoundError(f"{docx_content} does not exist.")
         elif isinstance(docx_content, bytes):
             docx_content = BytesIO(docx_content)
 
         self.table_content = self.extract_table(docx_content)
-        text = ''
+        text = ""
 
         # unzip the docx_content in memory
         zipf = zipfile.ZipFile(docx_content)
         filelist = zipf.namelist()
 
         header_files, footer_files, img_files = [], [], []
-        header_xmls = 'word/header[0-9]*.xml'
-        footer_xmls = 'word/footer[0-9]*.xml'
+        header_xmls = "word/header[0-9]*.xml"
+        footer_xmls = "word/footer[0-9]*.xml"
 
         for fname in filelist:
             if re.match(header_xmls, fname):
@@ -57,17 +59,17 @@ class ExtractWord():
         # get header text
         # there can be 3 header files in the zip
         header_text = [self.xml2text(zipf.read(path)) for path in header_files]
-        text += ''.join(header_text)
+        text += "".join(header_text)
 
         # get main text
-        doc_xml = 'word/document.xml'
+        doc_xml = "word/document.xml"
         main_txt = self.xml2text(zipf.read(doc_xml))
         text += main_txt
 
         # get footer text
         # there can be 3 footer files in the zip
         footer_text = [self.xml2text(zipf.read(path)) for path in footer_files]
-        text += ''.join(footer_text)
+        text += "".join(footer_text)
 
         if save_img_dir:
             mkdir(save_img_dir)
@@ -76,7 +78,7 @@ class ExtractWord():
                 with open(dst_fname, "wb") as dst_f:
                     dst_f.write(zipf.read(img_path))
         zipf.close()
-        return text.strip() + '\n'.join(self.table_content)
+        return text.strip() + "\n".join(self.table_content)
 
     def qn(self, tag):
         """
@@ -85,9 +87,9 @@ class ExtractWord():
         example, ``qn('p:cSld')`` returns ``'{http://schemas.../main}cSld'``.
         Source: https://github.com/python-openxml/python-docx/
         """
-        prefix, tagroot = tag.split(':')
+        prefix, tagroot = tag.split(":")
         uri = self.nsmap[prefix]
-        return f'{{{uri}}}{tagroot}'
+        return f"{{{uri}}}{tagroot}"
 
     def xml2text(self, xml):
         """
@@ -96,46 +98,50 @@ class ExtractWord():
         equivalent.
         Adapted from: https://github.com/python-openxml/python-docx/
         """
-        text = ''
+        text = ""
         table_xml = self.extract_table_by_xml(xml_path=xml)
 
         root = ET.fromstring(xml)
         for child in root.iter():
-            if child.tag == self.qn('w:t'):
+            if child.tag == self.qn("w:t"):
                 t_text = child.text
                 if t_text in table_xml:
                     continue
 
-                text += t_text if t_text is not None else ''
-            elif child.tag == self.qn('w:tab'):
-                text += '\t'
-            elif child.tag in (self.qn('w:br'), self.qn('w:cr')):
-                text += '\n'
+                text += t_text if t_text is not None else ""
+            elif child.tag == self.qn("w:tab"):
+                text += "\t"
+            elif child.tag in (self.qn("w:br"), self.qn("w:cr")):
+                text += "\n"
             elif child.tag == self.qn("w:p"):
-                text += '\n\n'
+                text += "\n\n"
         return text
 
-    def extract_table_by_xml(self, xml_path: str,) -> str:
+    def extract_table_by_xml(
+        self,
+        xml_path: str,
+    ) -> str:
         tree = etree.fromstring(xml_path, self.parser)
-        table_txts = tree.xpath('//w:tbl//w:t/text()',
-                                namespaces=self.nsmap)
+        table_txts = tree.xpath("//w:tbl//w:t/text()", namespaces=self.nsmap)
         return table_txts
 
 
-class ExtractWordTable():
-    def __init__(self,):
+class ExtractWordTable:
+    def __init__(
+        self,
+    ):
         pass
 
     def __call__(self, docx_content):
         curr_content = []
         doc = docx.Document(docx_content)
         for block in self.iter_block_items(doc):
-            if is_contain(block.style.name, ['Table', 'Table Grid']):
+            if is_contain(block.style.name, ["Table", "Table Grid"]):
                 df = self.get_table_dataframe(block)
                 try:
-                    curr_content.append(f'\n{df.to_markdown()}')
+                    curr_content.append(f"\n{df.to_markdown()}")
                 except:
-                    curr_content.append(f'\n{df}')
+                    curr_content.append(f"\n{df}")
         return curr_content
 
     def iter_block_items(self, parent):
@@ -153,7 +159,7 @@ class ExtractWordTable():
                 yield Table(child, parent)
 
     def get_table_dataframe(self, table: docx.table.Table) -> pd.DataFrame:
-        '''获取表格数据，转换为dataframe数据结构'''
+        """获取表格数据，转换为dataframe数据结构"""
         text = []
         if len(table.rows) == 1:
             for i in table.rows[0].cells:
@@ -177,8 +183,8 @@ class ExtractWordTable():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('word_path', type=str)
-    parser.add_argument('-img_dir', '--save_img_dir', type=str, default=None)
+    parser.add_argument("word_path", type=str)
+    parser.add_argument("-img_dir", "--save_img_dir", type=str, default=None)
     args = parser.parse_args()
 
     word_extract = ExtractWord()
@@ -186,5 +192,5 @@ def main():
     print(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
