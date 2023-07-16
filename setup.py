@@ -61,12 +61,13 @@ setuptools.setup(
     keywords=['extract,office,text,content'],
     classifiers=[
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    python_requires='>=3.6,<=3.11',
+    python_requires='>=3.6,<3.12',
     entry_points={
         'console_scripts': [
             f'extract_office_content={MODULE_NAME}.main:main',
